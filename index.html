@@ -12,35 +12,16 @@
         :root { --gold: #c5a059; --cream: #fbf9f6; --dark: #1a1a1a; }
         body { background-color: var(--cream); color: var(--dark); font-family: 'Lato', sans-serif; overflow-x: hidden; }
         
-        /* Typography */
         h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
         .sinhala { font-family: 'Noto Sans Sinhala', sans-serif; }
         
-        /* 3D Background */
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.5; pointer-events: none; }
-        
-        /* Navbar Glass Effect */
         .glass-nav { background: rgba(251, 249, 246, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(197, 160, 89, 0.15); }
         
-        /* Chat Styling */
         .chat-ai { background-color: #f4f1ea; color: #333; border-left: 3px solid var(--gold); border-radius: 4px 12px 12px 12px; font-size: 0.9rem; }
         .chat-user { background-color: #2d2d2d; color: white; border-radius: 12px 4px 12px 12px; font-size: 0.9rem; }
-        
-        /* Error Styling */
-        .chat-error { 
-            background-color: #ffe4e6; 
-            color: #991b1b; 
-            border: 1px solid #fecaca; 
-            padding: 10px; 
-            border-radius: 8px; 
-            font-size: 0.85rem; 
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .chat-error { background-color: #ffe4e6; color: #991b1b; border: 1px solid #fecaca; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; }
 
-        /* Kina AI Branding */
         .kina-footer { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; letter-spacing: 0.05em; }
         .kina-footer span { color: var(--gold); font-weight: bold; }
     </style>
@@ -94,7 +75,7 @@
         
         <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 bg-[#fafafa] text-sm sinhala">
             <div class="chat-ai p-4 shadow-sm">
-                Hello! Welcome to VELORA. How can I assist you with your jewelry or item needs today?
+                Hello! Welcome to VELORA. How can I assist you with our exclusive collection today?
             </div>
         </div>
 
@@ -105,7 +86,9 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </button>
             </div>
-            <div class="kina-footer">Powered by <span>kina ai</span></div>
+            <div class="kina-footer">
+                Powered by <span>kina ai</span>
+            </div>
         </div>
     </div>
 
@@ -146,22 +129,23 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // ==========================================
-        // ✅ UPDATED KEY & MODEL ✅
-        // ==========================================
+        // ==========================================================
+        // ✅ අලුත් KEY එක දැම්මා (NEW KEY ADDED) ✅
+        // ==========================================================
         const GROQ_API_KEY = "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"; 
-        // ==========================================
+        // ==========================================================
+
+        // Variable to store product info for AI
+        let productDetails = "Available Products in our Store:\n";
 
         // --- THREE.JS BACKGROUND ---
         function initThreeJS() {
             const container = document.getElementById('canvas-container');
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
-            
-            // Gold Particles
             const particlesGeometry = new THREE.BufferGeometry();
             const count = 450; 
             const posArray = new Float32Array(count * 3);
@@ -171,14 +155,13 @@
             const mesh = new THREE.Points(particlesGeometry, material);
             scene.add(mesh);
             camera.position.z = 4;
-            
             function animate() {
                 mesh.rotation.y += 0.0008; 
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
             }
             animate();
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         }
         initThreeJS();
 
@@ -189,37 +172,58 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "products"));
                 container.innerHTML = ''; 
-                if (querySnapshot.empty) { container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No items yet.</p>'; return; }
+                if (querySnapshot.empty) { container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No exclusive items available at the moment.</p>'; return; }
+                
                 querySnapshot.forEach((docSnap) => {
                     const item = docSnap.data();
-                    const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase hover:underline mb-2 block">Catalog ↗</a>` : '';
-                    container.innerHTML += `<div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative">
-                        <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700"></div>
-                        <div class="text-center flex-grow flex flex-col justify-end"><h3 class="font-serif text-lg text-gray-900 mb-1">${item.name}</h3>${whatsappLink}<p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p></div>
-                        <button onclick="addToCart('${docSnap.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white transition">Add to Bag</button></div>`;
+                    
+                    // ✅ Add product info to the variable for AI
+                    productDetails += `- ${item.name} : Rs. ${item.price}\n`;
+
+                    const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
+                    container.innerHTML += `
+                        <div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative">
+                            <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                            </div>
+                            <div class="text-center flex-grow flex flex-col justify-end">
+                                <h3 class="font-serif text-lg text-gray-900 mb-1 leading-tight">${item.name}</h3>
+                                ${whatsappLink}
+                                <p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p>
+                            </div>
+                            <button onclick="addToCart('${docSnap.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition duration-300">Add to Bag</button>
+                        </div>`;
                 });
-            } catch (e) { container.innerHTML = '<p class="col-span-full text-center text-red-400">Loading Error.</p>'; }
+            } catch (e) { container.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load items.</p>'; }
         }
-        window.addToCart = (id, n, p) => { cart.push({ id, n, p }); updateCartUI(); const badge = document.getElementById('cart-count'); badge.classList.add('scale-150', 'bg-red-500'); setTimeout(() => badge.classList.remove('scale-150', 'bg-red-500'), 300); };
+        window.addToCart = (id, name, price) => { 
+            cart.push({ id, name, price }); updateCartUI(); 
+            const badge = document.getElementById('cart-count'); 
+            badge.classList.add('scale-150', 'bg-red-500'); 
+            setTimeout(() => badge.classList.remove('scale-150', 'bg-red-500'), 300); 
+        };
         window.toggleCart = () => document.getElementById('cart-modal').classList.toggle('hidden');
         window.removeFromCart = (index) => { cart.splice(index, 1); updateCartUI(); };
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             const list = document.getElementById('cart-items');
             let total = 0; list.innerHTML = '';
-            cart.forEach((item, index) => { total += item.p; list.innerHTML += `<li class="flex gap-4 items-center border-b border-gray-50 pb-4"><div class="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-lg">✨</div><div class="flex-1"><h4 class="font-bold text-gray-800 text-sm serif">${item.n}</h4><p class="text-xs text-gray-500">Rs. ${item.p.toLocaleString()}</p></div><button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500">✕</button></li>`; });
+            cart.forEach((item, index) => { 
+                total += item.price; 
+                list.innerHTML += `<li class="flex gap-4 items-center border-b border-gray-50 pb-4"><div class="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-lg">✨</div><div class="flex-1"><h4 class="font-bold text-gray-800 text-sm serif">${item.name}</h4><p class="text-xs text-gray-500">Rs. ${item.price.toLocaleString()}</p></div><button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition">✕</button></li>`; 
+            });
             document.getElementById('cart-total').innerText = total.toLocaleString();
         }
         window.checkoutWhatsApp = async () => {
             if (cart.length === 0) return alert("Bag is empty!");
             cart.forEach(async (item) => { try { const productRef = doc(db, "products", item.id); await updateDoc(productRef, { clicks: increment(1) }); } catch(e) {} });
-            let msg = "*ORDER - VELORA* 💍\n\n"; let total = 0;
-            cart.forEach(item => { msg += `▪ ${item.n} : Rs. ${item.p}\n`; total += item.p; });
+            let msg = "*ORDER INQUIRY - VELORA* 💍\n\n"; let total = 0;
+            cart.forEach(item => { msg += `▪ ${item.name} : Rs. ${item.price}\n`; total += item.price; });
             msg += `\n*TOTAL: Rs. ${total.toLocaleString()}*`;
             window.open(`https://wa.me/94717148469?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // --- UPDATED AI CHAT LOGIC ---
+        // --- AI CHAT SYSTEM (UPDATED) ---
         window.toggleChat = () => document.getElementById('chat-window').classList.toggle('hidden');
 
         window.sendMessage = async () => {
@@ -228,18 +232,15 @@
             
             addMsg(msg, 'user');
             input.value = '';
-            
             const loadingId = addMsg("Thinking...", 'ai');
 
-            // 1. KEY CHECK
             if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
-                document.getElementById(loadingId).remove();
+                const el = document.getElementById(loadingId); if(el) el.remove();
                 addMsg("⚠️ API Key Error: Please check index.html code.", 'error');
                 return;
             }
 
             try {
-                // 2. TIMEOUT (10s)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -247,10 +248,16 @@
                     method: "POST",
                     headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        // ✅ FIX: CHANGED TO SUPPORTED MODEL ✅
                         model: "llama-3.3-70b-versatile",
                         messages: [
-                            { role: "system", content: "You are Velora AI. Answer briefly and professionally." },
+                            { 
+                                role: "system", 
+                                content: `You are Velora AI. Answer briefly and strictly in English. 
+                                          Only answer based on the following product details. 
+                                          If the user asks about something not in this list, say you don't know politely.
+                                          
+                                          ${productDetails}` 
+                            },
                             { role: "user", content: msg }
                         ]
                     }),
@@ -259,41 +266,49 @@
                 
                 clearTimeout(timeoutId);
 
-                // 3. ERROR HANDLING
                 if (!res.ok) { 
                     const text = await res.text();
                     throw new Error(`Server Error: ${res.status} | ${text}`); 
                 }
 
                 const data = await res.json();
-                document.getElementById(loadingId).remove();
+                const el = document.getElementById(loadingId); if(el) el.remove();
                 addMsg(data.choices[0].message.content, 'ai');
 
             } catch (error) {
-                document.getElementById(loadingId).remove();
+                const el = document.getElementById(loadingId); if(el) el.remove();
                 console.error("Debug:", error);
                 
                 let errorText = "Unknown Error";
-                if (error.name === 'AbortError') errorText = "⚠️ Timeout: Server slow.";
+                if (error.name === 'AbortError') errorText = "⚠️ Timeout: Server took too long.";
                 else if(error.message.includes("401")) errorText = "🛑 Error 401: Invalid API Key.";
-                else if(error.message.includes("Failed to fetch")) errorText = "⚠️ Network Error.";
                 else errorText = "⚠️ Error: " + error.message;
                 
                 addMsg(errorText, 'error');
             }
         };
 
+        // ✅ FIXED addMsg FUNCTION (Unique ID Issue Solved)
         function addMsg(text, type) {
             const box = document.getElementById('chat-messages');
             const div = document.createElement('div');
+            
+            // Generate Unique ID
+            const uniqueId = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 9);
+            div.id = uniqueId;
+
             let className = 'chat-ai p-4 shadow-sm';
             if (type === 'user') className = 'chat-user p-4 shadow-sm self-end';
             if (type === 'error') className = 'chat-error self-center';
             div.className = className; div.innerText = text;
+            
             const wrapper = document.createElement('div');
             wrapper.className = `flex w-full ${type === 'user' ? 'justify-end' : 'justify-start'}`;
-            wrapper.appendChild(div); box.appendChild(wrapper); box.scrollTop = box.scrollHeight;
-            return div.id; 
+            wrapper.appendChild(div); 
+            box.appendChild(wrapper); 
+            box.scrollTop = box.scrollHeight;
+            
+            return uniqueId; 
         }
 
         loadProducts();
