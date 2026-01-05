@@ -25,7 +25,20 @@
         /* Chat Styling */
         .chat-ai { background-color: #f4f1ea; color: #333; border-left: 3px solid var(--gold); border-radius: 4px 12px 12px 12px; font-size: 0.9rem; }
         .chat-user { background-color: #2d2d2d; color: white; border-radius: 12px 4px 12px 12px; font-size: 0.9rem; }
-        .chat-error { background-color: #fef2f2; color: #b91c1c; font-size: 0.8rem; padding: 8px; border-radius: 8px; border: 1px solid #fecaca; }
+        
+        /* Error Styling */
+        .chat-error { 
+            background-color: #ffe4e6; 
+            color: #991b1b; 
+            border: 1px solid #fecaca; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         /* Kina AI Branding */
         .kina-footer { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; letter-spacing: 0.05em; }
@@ -38,9 +51,11 @@
 
     <nav class="glass-nav fixed w-full top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex flex-col">
-                <h1 class="text-3xl font-bold tracking-[0.2em] text-gray-900 serif">VELORA</h1>
-                <span class="text-[9px] uppercase tracking-[0.4em] text-yellow-600 mt-1 pl-1">Luxury Collection</span>
+            <div class="flex items-center gap-3">
+                <div class="flex flex-col">
+                    <h1 class="text-3xl font-bold tracking-[0.2em] text-gray-900 serif">VELORA</h1>
+                    <span class="text-[9px] uppercase tracking-[0.4em] text-yellow-600 mt-1 pl-1">Luxury Collection</span>
+                </div>
             </div>
             <div onclick="toggleCart()" class="cursor-pointer relative group p-2 hover:bg-yellow-50 rounded-full transition duration-300">
                 <span class="text-2xl opacity-80 group-hover:opacity-100">🛒</span>
@@ -90,9 +105,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </button>
             </div>
-            <div class="kina-footer">
-                Powered by <span>kina ai</span>
-            </div>
+            <div class="kina-footer">Powered by <span>kina ai</span></div>
         </div>
     </div>
 
@@ -120,7 +133,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBoRUkCAhDUfabz2HVv3WO_IvgOHl1bjG8",
             authDomain: "velora-ea392.firebaseapp.com",
@@ -134,112 +146,80 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- GROQ API KEY ---
-        const GROQ_API_KEY = "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"; 
+        // ==========================================
+        // ✅ UPDATED KEY & MODEL ✅
+        // ==========================================
+        const GROQ_API_KEY = "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"; 
+        // ==========================================
 
         // --- THREE.JS BACKGROUND ---
         function initThreeJS() {
             const container = document.getElementById('canvas-container');
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
-
-            // Particles System
+            
+            // Gold Particles
             const particlesGeometry = new THREE.BufferGeometry();
             const count = 450; 
             const posArray = new Float32Array(count * 3);
             for(let i = 0; i < count * 3; i++) posArray[i] = (Math.random() - 0.5) * 16;
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            
             const material = new THREE.PointsMaterial({ size: 0.04, color: 0xc5a059, transparent: true, opacity: 0.6 });
             const mesh = new THREE.Points(particlesGeometry, material);
             scene.add(mesh);
             camera.position.z = 4;
-
-            // Interactive Movement
-            let mouseY = 0; let mouseX = 0;
-            document.addEventListener('mousemove', (e) => { mouseY = e.clientY / window.innerHeight; mouseX = e.clientX / window.innerWidth; });
-
+            
             function animate() {
-                mesh.rotation.y += 0.0008; // Continuous slow rotation
-                // Mouse interaction
-                mesh.rotation.x += ( -mouseY * 0.2 - mesh.rotation.x ) * 0.05;
-                mesh.rotation.y += ( mouseX * 0.2 - mesh.rotation.y ) * 0.05;
+                mesh.rotation.y += 0.0008; 
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
             }
             animate();
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         }
         initThreeJS();
 
         // --- SHOP & CART LOGIC ---
         let cart = [];
-
         async function loadProducts() {
             const container = document.getElementById('product-container');
             try {
                 const querySnapshot = await getDocs(collection(db, "products"));
                 container.innerHTML = ''; 
-                
-                if (querySnapshot.empty) { container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No exclusive items available at the moment.</p>'; return; }
-
+                if (querySnapshot.empty) { container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No items yet.</p>'; return; }
                 querySnapshot.forEach((docSnap) => {
                     const item = docSnap.data();
-                    const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
-
-                    container.innerHTML += `
-                        <div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative">
-                            <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4">
-                                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
-                                <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition"></div>
-                            </div>
-                            <div class="text-center flex-grow flex flex-col justify-end">
-                                <h3 class="font-serif text-lg text-gray-900 mb-1 leading-tight">${item.name}</h3>
-                                ${whatsappLink}
-                                <p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p>
-                            </div>
-                            <button onclick="addToCart('${docSnap.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition duration-300">Add to Bag</button>
-                        </div>`;
+                    const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase hover:underline mb-2 block">Catalog ↗</a>` : '';
+                    container.innerHTML += `<div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative">
+                        <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700"></div>
+                        <div class="text-center flex-grow flex flex-col justify-end"><h3 class="font-serif text-lg text-gray-900 mb-1">${item.name}</h3>${whatsappLink}<p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p></div>
+                        <button onclick="addToCart('${docSnap.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white transition">Add to Bag</button></div>`;
                 });
-            } catch (e) { container.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load items.</p>'; }
+            } catch (e) { container.innerHTML = '<p class="col-span-full text-center text-red-400">Loading Error.</p>'; }
         }
-
-        window.addToCart = (id, name, price) => { 
-            cart.push({ id, name, price }); updateCartUI(); 
-            const badge = document.getElementById('cart-count'); 
-            badge.classList.add('scale-150', 'bg-red-500'); 
-            setTimeout(() => badge.classList.remove('scale-150', 'bg-red-500'), 300); 
-        };
+        window.addToCart = (id, n, p) => { cart.push({ id, n, p }); updateCartUI(); const badge = document.getElementById('cart-count'); badge.classList.add('scale-150', 'bg-red-500'); setTimeout(() => badge.classList.remove('scale-150', 'bg-red-500'), 300); };
         window.toggleCart = () => document.getElementById('cart-modal').classList.toggle('hidden');
         window.removeFromCart = (index) => { cart.splice(index, 1); updateCartUI(); };
-
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             const list = document.getElementById('cart-items');
             let total = 0; list.innerHTML = '';
-            if (cart.length === 0) list.innerHTML = '<p class="text-center text-gray-400 mt-20 text-sm">Your bag is empty.</p>';
-            cart.forEach((item, index) => { 
-                total += item.price; 
-                list.innerHTML += `<li class="flex gap-4 items-center border-b border-gray-50 pb-4"><div class="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-lg">✨</div><div class="flex-1"><h4 class="font-bold text-gray-800 text-sm serif">${item.name}</h4><p class="text-xs text-gray-500">Rs. ${item.price.toLocaleString()}</p></div><button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition">✕</button></li>`; 
-            });
+            cart.forEach((item, index) => { total += item.p; list.innerHTML += `<li class="flex gap-4 items-center border-b border-gray-50 pb-4"><div class="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-lg">✨</div><div class="flex-1"><h4 class="font-bold text-gray-800 text-sm serif">${item.n}</h4><p class="text-xs text-gray-500">Rs. ${item.p.toLocaleString()}</p></div><button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500">✕</button></li>`; });
             document.getElementById('cart-total').innerText = total.toLocaleString();
         }
-
         window.checkoutWhatsApp = async () => {
             if (cart.length === 0) return alert("Bag is empty!");
-            // Analytics
             cart.forEach(async (item) => { try { const productRef = doc(db, "products", item.id); await updateDoc(productRef, { clicks: increment(1) }); } catch(e) {} });
-            let msg = "*ORDER INQUIRY - VELORA* 💍\n\n"; let total = 0;
-            cart.forEach(item => { msg += `▪ ${item.name} : Rs. ${item.price}\n`; total += item.price; });
+            let msg = "*ORDER - VELORA* 💍\n\n"; let total = 0;
+            cart.forEach(item => { msg += `▪ ${item.n} : Rs. ${item.p}\n`; total += item.p; });
             msg += `\n*TOTAL: Rs. ${total.toLocaleString()}*`;
             window.open(`https://wa.me/94717148469?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // --- AI CHAT (UPDATED SYSTEM) ---
+        // --- UPDATED AI CHAT LOGIC ---
         window.toggleChat = () => document.getElementById('chat-window').classList.toggle('hidden');
 
         window.sendMessage = async () => {
@@ -248,59 +228,75 @@
             
             addMsg(msg, 'user');
             input.value = '';
+            
             const loadingId = addMsg("Thinking...", 'ai');
 
+            // 1. KEY CHECK
+            if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
+                document.getElementById(loadingId).remove();
+                addMsg("⚠️ API Key Error: Please check index.html code.", 'error');
+                return;
+            }
+
             try {
+                // 2. TIMEOUT (10s)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        // UPDATED MODEL
+                        // ✅ FIX: CHANGED TO SUPPORTED MODEL ✅
                         model: "llama-3.3-70b-versatile",
                         messages: [
-                            { 
-                                role: "system", 
-                                content: "You are Velora AI, a high-end luxury shop assistant. Important Rule: If the user speaks Sinhala, reply in professional Sinhala. If the user speaks English, reply in elegant English. Keep responses short, polite, and sales-focused." 
-                            },
+                            { role: "system", content: "You are Velora AI. Answer briefly and professionally." },
                             { role: "user", content: msg }
                         ]
-                    })
+                    }),
+                    signal: controller.signal
                 });
                 
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || "Error"); }
+                clearTimeout(timeoutId);
+
+                // 3. ERROR HANDLING
+                if (!res.ok) { 
+                    const text = await res.text();
+                    throw new Error(`Server Error: ${res.status} | ${text}`); 
+                }
+
                 const data = await res.json();
                 document.getElementById(loadingId).remove();
                 addMsg(data.choices[0].message.content, 'ai');
 
             } catch (error) {
                 document.getElementById(loadingId).remove();
-                console.error(error);
-                if(error.message.includes("401")) addMsg("Error: API Key Expired.", 'error');
-                else addMsg("Connection Error. Please check internet.", 'error');
+                console.error("Debug:", error);
+                
+                let errorText = "Unknown Error";
+                if (error.name === 'AbortError') errorText = "⚠️ Timeout: Server slow.";
+                else if(error.message.includes("401")) errorText = "🛑 Error 401: Invalid API Key.";
+                else if(error.message.includes("Failed to fetch")) errorText = "⚠️ Network Error.";
+                else errorText = "⚠️ Error: " + error.message;
+                
+                addMsg(errorText, 'error');
             }
         };
 
         function addMsg(text, type) {
             const box = document.getElementById('chat-messages');
             const div = document.createElement('div');
-            
             let className = 'chat-ai p-4 shadow-sm';
             if (type === 'user') className = 'chat-user p-4 shadow-sm self-end';
             if (type === 'error') className = 'chat-error self-center';
-
-            div.className = className;
-            div.innerText = text;
-            
+            div.className = className; div.innerText = text;
             const wrapper = document.createElement('div');
             wrapper.className = `flex w-full ${type === 'user' ? 'justify-end' : 'justify-start'}`;
-            wrapper.appendChild(div);
-            box.appendChild(wrapper);
-            box.scrollTop = box.scrollHeight;
-            return div.id; // Return ID for loading handling
+            wrapper.appendChild(div); box.appendChild(wrapper); box.scrollTop = box.scrollHeight;
+            return div.id; 
         }
 
         loadProducts();
     </script>
 </body>
-
 </html>
