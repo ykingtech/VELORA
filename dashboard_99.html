@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELORA Admin - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 tracking-wider">VELORA <span class="text-yellow-600">ADMIN</span></h1>
+            <div class="bg-white px-4 py-2 rounded shadow text-sm">
+                <span class="text-gray-500">Total Items:</span> <span id="total-count" class="font-bold">0</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                <h3 class="text-gray-500 text-sm uppercase">Total Interested Clients</h3>
+                <p id="total-clicks" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                <p class="text-xs text-gray-400 mt-1">Clicked "Order via WhatsApp"</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <h3 class="text-gray-500 text-sm uppercase">Top Performing Item</h3>
+                <p id="top-item" class="text-xl font-bold text-gray-800 mt-2">-</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                <h3 class="text-gray-500 text-sm uppercase">Est. Revenue Potential</h3>
+                <p id="est-revenue" class="text-3xl font-bold text-gray-800 mt-2">Rs. 0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="bg-white p-6 rounded-xl shadow-md h-fit">
+                <h2 id="form-title" class="text-xl font-bold mb-4 text-gray-700">Add New Product</h2>
+                <input type="hidden" id="edit-id"> <div class="space-y-4">
+                    <input id="itemName" type="text" placeholder="Product Name" class="w-full border p-2 rounded focus:ring-2 focus:ring-yellow-500 outline-none">
+                    <input id="itemPrice" type="number" placeholder="Price (LKR)" class="w-full border p-2 rounded focus:ring-2 focus:ring-yellow-500 outline-none">
+                    <input id="catalogLink" type="text" placeholder="WhatsApp Catalog Link" class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-500 outline-none">
+                    
+                    <div class="border border-dashed p-4 rounded text-center cursor-pointer hover:bg-gray-50">
+                        <p class="text-xs text-gray-500 mb-2">Upload Image (Auto Compressed)</p>
+                        <input id="itemImageFile" type="file" accept="image/*" class="w-full text-xs">
+                        <img id="preview-img" class="mt-2 h-20 w-auto mx-auto hidden rounded shadow">
+                    </div>
+
+                    <button id="saveBtn" class="w-full bg-gray-900 text-white py-3 rounded hover:bg-yellow-600 transition font-bold">ADD PRODUCT</button>
+                    <button id="cancelBtn" class="w-full bg-gray-200 text-gray-700 py-2 rounded hover:bg-gray-300 transition hidden">Cancel Edit</button>
+                </div>
+                <p id="status" class="text-center text-xs mt-3 text-gray-500"></p>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Inventory Management</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-gray-500 uppercase border-b">
+                                <th class="p-3">Image</th>
+                                <th class="p-3">Name</th>
+                                <th class="p-3">Price</th>
+                                <th class="p-3 text-center">Interest</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table-body" class="text-sm text-gray-700">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBoRUkCAhDUfabz2HVv3WO_IvgOHl1bjG8",
+            authDomain: "velora-ea392.firebaseapp.com",
+            projectId: "velora-ea392",
+            storageBucket: "velora-ea392.firebasestorage.app",
+            messagingSenderId: "190374917970",
+            appId: "1:190374917970:web:ef4324bff42880b6e32c8b",
+            measurementId: "G-006QHPS187"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 1. Load Data (Real-time) ---
+        const tableBody = document.getElementById('product-table-body');
+        
+        onSnapshot(collection(db, "products"), (snapshot) => {
+            tableBody.innerHTML = '';
+            let totalItems = 0;
+            let totalClicks = 0;
+            let revenue = 0;
+            let topItemName = "-";
+            let maxClicks = -1;
+
+            snapshot.forEach((docSnap) => {
+                const item = docSnap.data();
+                const id = docSnap.id;
+                totalItems++;
+                
+                const clicks = item.clicks || 0;
+                totalClicks += clicks;
+                revenue += (item.price * clicks); // Hypothetical revenue based on interest
+
+                if(clicks > maxClicks) { maxClicks = clicks; topItemName = item.name; }
+
+                // Render Table Row
+                const row = `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-3"><img src="${item.image}" class="w-10 h-10 object-cover rounded"></td>
+                        <td class="p-3 font-bold">${item.name}</td>
+                        <td class="p-3">Rs. ${item.price}</td>
+                        <td class="p-3 text-center">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold">${clicks}</span>
+                        </td>
+                        <td class="p-3 text-right space-x-2">
+                            <button onclick="editItem('${id}', '${item.name}', ${item.price}, '${item.catalogLink || ''}', '${item.image}')" class="text-yellow-600 hover:text-yellow-800"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteItem('${id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+            // Update Stats
+            document.getElementById('total-count').innerText = totalItems;
+            document.getElementById('total-clicks').innerText = totalClicks;
+            document.getElementById('top-item').innerText = topItemName;
+            document.getElementById('est-revenue').innerText = "Rs. " + revenue.toLocaleString();
+        });
+
+        // --- 2. Add / Update Logic ---
+        let currentImageBase64 = "";
+
+        // Image Compression
+        document.getElementById('itemImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 800; 
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    // Show Preview
+                    const preview = document.getElementById('preview-img');
+                    preview.src = currentImageBase64;
+                    preview.classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('itemName').value;
+            const price = Number(document.getElementById('itemPrice').value);
+            const link = document.getElementById('catalogLink').value;
+            const status = document.getElementById('status');
+
+            if(!name || !price) return alert("Name and Price are required!");
+            if(!id && !currentImageBase64) return alert("Image is required for new items!");
+
+            status.innerText = "Processing...";
+            
+            try {
+                const data = {
+                    name: name,
+                    price: price,
+                    catalogLink: link,
+                    // If uploading new image use it, else keep old one (handled in logic below)
+                };
+                if(currentImageBase64) data.image = currentImageBase64;
+
+                if(id) {
+                    // UPDATE existing
+                    await updateDoc(doc(db, "products", id), data);
+                    status.innerText = "Item Updated!";
+                    resetForm();
+                } else {
+                    // ADD new
+                    data.clicks = 0; // Initialize analytics
+                    await addDoc(collection(db, "products"), data);
+                    status.innerText = "Item Added!";
+                    resetForm();
+                }
+            } catch(e) {
+                console.error(e);
+                status.innerText = "Error!";
+            }
+        });
+
+        // --- 3. Global Functions (Window) ---
+        window.deleteItem = async (id) => {
+            if(confirm("Are you sure you want to delete this item?")) {
+                await deleteDoc(doc(db, "products", id));
+            }
+        };
+
+        window.editItem = (id, name, price, link, image) => {
+            document.getElementById('form-title').innerText = "Edit Product";
+            document.getElementById('saveBtn').innerText = "UPDATE PRODUCT";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+            
+            document.getElementById('edit-id').value = id;
+            document.getElementById('itemName').value = name;
+            document.getElementById('itemPrice').value = price;
+            document.getElementById('catalogLink').value = link;
+            
+            const preview = document.getElementById('preview-img');
+            preview.src = image;
+            preview.classList.remove('hidden');
+            
+            // Keep old image unless changed
+            currentImageBase64 = ""; 
+        };
+
+        document.getElementById('cancelBtn').addEventListener('click', resetForm);
+
+        function resetForm() {
+            document.getElementById('form-title').innerText = "Add New Product";
+            document.getElementById('saveBtn').innerText = "ADD PRODUCT";
+            document.getElementById('cancelBtn').classList.add('hidden');
+            document.getElementById('edit-id').value = "";
+            document.getElementById('itemName').value = "";
+            document.getElementById('itemPrice').value = "";
+            document.getElementById('catalogLink').value = "";
+            document.getElementById('itemImageFile').value = "";
+            document.getElementById('preview-img').classList.add('hidden');
+            currentImageBase64 = "";
+            document.getElementById('status').innerText = "";
+        }
+    </script>
+</body>
+</html>
