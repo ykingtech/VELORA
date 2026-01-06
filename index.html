@@ -75,7 +75,7 @@
         
         <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 bg-[#fafafa] text-sm sinhala">
             <div class="chat-ai p-4 shadow-sm">
-                Hello! Welcome to VELORA. How can I assist you with our exclusive collection today?
+                Hello! Welcome to VELORA. I am your personal luxury assistant. How can I help you find the perfect piece today?
             </div>
         </div>
 
@@ -130,13 +130,16 @@
         const db = getFirestore(app);
         
         // ==========================================================
-        // ✅ අලුත් KEY එක දැම්මා (NEW KEY ADDED) ✅
+        // KEY එක (API KEY)
         // ==========================================================
         const GROQ_API_KEY = "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"; 
         // ==========================================================
 
         // Variable to store product info for AI
         let productDetails = "Available Products in our Store:\n";
+        
+        // ✅ NEW: Memory for the AI (Chat History)
+        let chatHistory = []; 
 
         // --- THREE.JS BACKGROUND ---
         function initThreeJS() {
@@ -177,7 +180,6 @@
                 querySnapshot.forEach((docSnap) => {
                     const item = docSnap.data();
                     
-                    // ✅ Add product info to the variable for AI
                     productDetails += `- ${item.name} : Rs. ${item.price}\n`;
 
                     const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
@@ -223,7 +225,7 @@
             window.open(`https://wa.me/94717148469?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // --- AI CHAT SYSTEM (UPDATED) ---
+        // --- AI CHAT SYSTEM (UPDATED WITH MEMORY) ---
         window.toggleChat = () => document.getElementById('chat-window').classList.toggle('hidden');
 
         window.sendMessage = async () => {
@@ -231,6 +233,10 @@
             const msg = input.value; if (!msg) return;
             
             addMsg(msg, 'user');
+            
+            // ✅ Add user message to memory
+            chatHistory.push({ role: "user", content: msg });
+
             input.value = '';
             const loadingId = addMsg("Thinking...", 'ai');
 
@@ -252,13 +258,19 @@
                         messages: [
                             { 
                                 role: "system", 
-                                content: `You are Velora AI. Answer briefly and strictly in English. 
-                                          Only answer based on the following product details. 
-                                          If the user asks about something not in this list, say you don't know politely.
+                                content: `You are Velora AI, a sophisticated luxury sales assistant.
                                           
+                                          YOUR GOAL:
+                                          - Be persuasive, elegant, and helpful.
+                                          - Remember the context of the conversation. If we are discussing a specific item, stick to it.
+                                          - Emphasize "Timeless Elegance," "Premium Quality," and "Status Symbol."
+                                          - Keep responses under 50 words.
+                                          - Answer in English.
+
+                                          PRODUCT LIST:
                                           ${productDetails}` 
                             },
-                            { role: "user", content: msg }
+                            ...chatHistory // ✅ Sends past conversation history
                         ]
                     }),
                     signal: controller.signal
@@ -272,8 +284,13 @@
                 }
 
                 const data = await res.json();
+                const aiReply = data.choices[0].message.content;
+                
                 const el = document.getElementById(loadingId); if(el) el.remove();
-                addMsg(data.choices[0].message.content, 'ai');
+                addMsg(aiReply, 'ai');
+
+                // ✅ Add AI response to memory
+                chatHistory.push({ role: "assistant", content: aiReply });
 
             } catch (error) {
                 const el = document.getElementById(loadingId); if(el) el.remove();
@@ -288,12 +305,9 @@
             }
         };
 
-        // ✅ FIXED addMsg FUNCTION (Unique ID Issue Solved)
         function addMsg(text, type) {
             const box = document.getElementById('chat-messages');
             const div = document.createElement('div');
-            
-            // Generate Unique ID
             const uniqueId = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 9);
             div.id = uniqueId;
 
@@ -307,7 +321,6 @@
             wrapper.appendChild(div); 
             box.appendChild(wrapper); 
             box.scrollTop = box.scrollHeight;
-            
             return uniqueId; 
         }
 
