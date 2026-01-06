@@ -18,12 +18,21 @@
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.5; pointer-events: none; }
         .glass-nav { background: rgba(251, 249, 246, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(197, 160, 89, 0.15); }
         
+        /* Chat Styles */
         .chat-ai { background-color: #f4f1ea; color: #333; border-left: 3px solid var(--gold); border-radius: 4px 12px 12px 12px; font-size: 0.9rem; }
         .chat-user { background-color: #2d2d2d; color: white; border-radius: 12px 4px 12px 12px; font-size: 0.9rem; }
         .chat-error { background-color: #ffe4e6; color: #991b1b; border: 1px solid #fecaca; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; }
 
         .kina-footer { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; letter-spacing: 0.05em; }
         .kina-footer span { color: var(--gold); font-weight: bold; }
+
+        /* Search Bar Glow Animation */
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(197, 160, 89, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.2); }
+        }
+        .search-glow:focus-within { animation: glow 2s infinite; border-color: var(--gold); }
     </style>
 </head>
 <body class="antialiased selection:bg-yellow-200 selection:text-black">
@@ -45,13 +54,23 @@
         </div>
     </nav>
 
-    <header class="pt-44 pb-20 text-center px-4 fade-in">
+    <header class="pt-44 pb-12 text-center px-4 fade-in">
         <p class="text-xs font-bold tracking-[0.3em] text-yellow-600 uppercase mb-4">New Arrivals</p>
         <h2 class="text-5xl md:text-7xl text-gray-900 serif italic mb-8">Timeless Elegance</h2>
         <div class="w-20 h-[2px] bg-yellow-600 mx-auto opacity-60"></div>
     </header>
 
-    <main id="product-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-40">
+    <div class="relative max-w-lg mx-auto px-6 mb-16 z-40">
+        <div class="absolute inset-0 bg-yellow-600/20 blur-2xl rounded-full opacity-0 hover:opacity-100 transition duration-700 pointer-events-none"></div>
+        <div class="search-glow relative flex items-center bg-white/40 backdrop-blur-xl border border-white/50 rounded-full p-2 shadow-xl transition-all duration-300 hover:bg-white/60">
+            <div class="pl-4 pr-2 text-yellow-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <input type="text" id="live-search" placeholder="Search exclusively..." class="w-full bg-transparent border-none outline-none text-gray-800 placeholder-gray-500 font-serif text-lg h-10 px-2" oninput="filterProducts()">
+        </div>
+    </div>
+
+    <main id="product-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-40 min-h-[400px]">
         <div class="col-span-full text-center py-20">
             <div class="inline-block w-8 h-8 border-4 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-gray-400 text-xs mt-4 tracking-widest uppercase">Curating Collection...</p>
@@ -129,16 +148,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // ==========================================================
-        // KEY එක (API KEY)
-        // ==========================================================
+        // API KEY
         const GROQ_API_KEY = "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"; 
-        // ==========================================================
 
-        // Variable to store product info for AI
-        let productDetails = "Available Products in our Store:\n";
-        
-        // ✅ NEW: Memory for the AI (Chat History)
+        // Data Storage
+        let productDetails = "Available Products:\n";
+        let allProductsData = []; // Store fetched products here for live search
         let chatHistory = []; 
 
         // --- THREE.JS BACKGROUND ---
@@ -149,17 +164,26 @@
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
+            
             const particlesGeometry = new THREE.BufferGeometry();
-            const count = 450; 
+            const count = 500; 
             const posArray = new Float32Array(count * 3);
-            for(let i = 0; i < count * 3; i++) posArray[i] = (Math.random() - 0.5) * 16;
+            for(let i = 0; i < count * 3; i++) posArray[i] = (Math.random() - 0.5) * 18;
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const material = new THREE.PointsMaterial({ size: 0.04, color: 0xc5a059, transparent: true, opacity: 0.6 });
+            
+            const material = new THREE.PointsMaterial({ size: 0.05, color: 0xc5a059, transparent: true, opacity: 0.7 });
             const mesh = new THREE.Points(particlesGeometry, material);
             scene.add(mesh);
-            camera.position.z = 4;
+            camera.position.z = 5;
+
+            // Subtle mouse interaction
+            document.addEventListener('mousemove', (event) => {
+                mesh.rotation.x = event.clientY * 0.0001;
+                mesh.rotation.y = event.clientX * 0.0001;
+            });
+
             function animate() {
-                mesh.rotation.y += 0.0008; 
+                mesh.rotation.y += 0.0005; 
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
             }
@@ -168,36 +192,75 @@
         }
         initThreeJS();
 
-        // --- SHOP & CART LOGIC ---
+        // --- SHOP & SEARCH LOGIC ---
         let cart = [];
+
         async function loadProducts() {
             const container = document.getElementById('product-container');
             try {
                 const querySnapshot = await getDocs(collection(db, "products"));
-                container.innerHTML = ''; 
-                if (querySnapshot.empty) { container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No exclusive items available at the moment.</p>'; return; }
                 
+                if (querySnapshot.empty) { 
+                    container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No exclusive items available at the moment.</p>'; 
+                    return; 
+                }
+                
+                // Clear and Populate Global Data
+                allProductsData = [];
+                productDetails = "Available Products:\n";
+
                 querySnapshot.forEach((docSnap) => {
                     const item = docSnap.data();
-                    
+                    const productObj = { id: docSnap.id, ...item };
+                    allProductsData.push(productObj);
                     productDetails += `- ${item.name} : Rs. ${item.price}\n`;
-
-                    const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
-                    container.innerHTML += `
-                        <div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative">
-                            <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4">
-                                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
-                            </div>
-                            <div class="text-center flex-grow flex flex-col justify-end">
-                                <h3 class="font-serif text-lg text-gray-900 mb-1 leading-tight">${item.name}</h3>
-                                ${whatsappLink}
-                                <p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p>
-                            </div>
-                            <button onclick="addToCart('${docSnap.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition duration-300">Add to Bag</button>
-                        </div>`;
                 });
-            } catch (e) { container.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load items.</p>'; }
+
+                // Initial Render
+                renderProducts(allProductsData);
+
+            } catch (e) { 
+                console.error(e);
+                container.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load items.</p>'; 
+            }
         }
+
+        // --- RENDER & FILTER FUNCTION ---
+        window.renderProducts = (products) => {
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10"><p class="text-gray-400 text-lg serif">No items match your search.</p></div>';
+                return;
+            }
+
+            products.forEach(item => {
+                const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
+                
+                const html = `
+                    <div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative fade-in">
+                        <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                        </div>
+                        <div class="text-center flex-grow flex flex-col justify-end">
+                            <h3 class="font-serif text-lg text-gray-900 mb-1 leading-tight">${item.name}</h3>
+                            ${whatsappLink}
+                            <p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p>
+                        </div>
+                        <button onclick="addToCart('${item.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition duration-300">Add to Bag</button>
+                    </div>`;
+                container.innerHTML += html;
+            });
+        };
+
+        window.filterProducts = () => {
+            const searchTerm = document.getElementById('live-search').value.toLowerCase();
+            const filtered = allProductsData.filter(item => item.name.toLowerCase().includes(searchTerm));
+            renderProducts(filtered);
+        };
+
+        // --- CART FUNCTIONS ---
         window.addToCart = (id, name, price) => { 
             cart.push({ id, name, price }); updateCartUI(); 
             const badge = document.getElementById('cart-count'); 
@@ -225,7 +288,7 @@
             window.open(`https://wa.me/94717148469?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // --- AI CHAT SYSTEM (UPDATED WITH MEMORY) ---
+        // --- AI CHAT SYSTEM (WITH MEMORY) ---
         window.toggleChat = () => document.getElementById('chat-window').classList.toggle('hidden');
 
         window.sendMessage = async () => {
@@ -233,16 +296,14 @@
             const msg = input.value; if (!msg) return;
             
             addMsg(msg, 'user');
-            
-            // ✅ Add user message to memory
-            chatHistory.push({ role: "user", content: msg });
+            chatHistory.push({ role: "user", content: msg }); // Memory update
 
             input.value = '';
             const loadingId = addMsg("Thinking...", 'ai');
 
             if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
                 const el = document.getElementById(loadingId); if(el) el.remove();
-                addMsg("⚠️ API Key Error: Please check index.html code.", 'error');
+                addMsg("⚠️ API Key Error: Please check code.", 'error');
                 return;
             }
 
@@ -259,18 +320,13 @@
                             { 
                                 role: "system", 
                                 content: `You are Velora AI, a sophisticated luxury sales assistant.
-                                          
-                                          YOUR GOAL:
-                                          - Be persuasive, elegant, and helpful.
-                                          - Remember the context of the conversation. If we are discussing a specific item, stick to it.
-                                          - Emphasize "Timeless Elegance," "Premium Quality," and "Status Symbol."
-                                          - Keep responses under 50 words.
-                                          - Answer in English.
-
-                                          PRODUCT LIST:
-                                          ${productDetails}` 
+                                          GOAL: Be persuasive, elegant, and helpful. 
+                                          If discussing a specific item, remember it.
+                                          Emphasize "Timeless Elegance," "Premium Quality," and "Status Symbol."
+                                          Keep responses under 50 words. Answer in English.
+                                          PRODUCT LIST: ${productDetails}` 
                             },
-                            ...chatHistory // ✅ Sends past conversation history
+                            ...chatHistory 
                         ]
                     }),
                     signal: controller.signal
@@ -278,30 +334,19 @@
                 
                 clearTimeout(timeoutId);
 
-                if (!res.ok) { 
-                    const text = await res.text();
-                    throw new Error(`Server Error: ${res.status} | ${text}`); 
-                }
+                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
 
                 const data = await res.json();
                 const aiReply = data.choices[0].message.content;
                 
                 const el = document.getElementById(loadingId); if(el) el.remove();
                 addMsg(aiReply, 'ai');
-
-                // ✅ Add AI response to memory
-                chatHistory.push({ role: "assistant", content: aiReply });
+                chatHistory.push({ role: "assistant", content: aiReply }); // Memory update
 
             } catch (error) {
                 const el = document.getElementById(loadingId); if(el) el.remove();
                 console.error("Debug:", error);
-                
-                let errorText = "Unknown Error";
-                if (error.name === 'AbortError') errorText = "⚠️ Timeout: Server took too long.";
-                else if(error.message.includes("401")) errorText = "🛑 Error 401: Invalid API Key.";
-                else errorText = "⚠️ Error: " + error.message;
-                
-                addMsg(errorText, 'error');
+                addMsg("⚠️ Connection Error. Please try again.", 'error');
             }
         };
 
@@ -310,12 +355,10 @@
             const div = document.createElement('div');
             const uniqueId = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 9);
             div.id = uniqueId;
-
             let className = 'chat-ai p-4 shadow-sm';
             if (type === 'user') className = 'chat-user p-4 shadow-sm self-end';
             if (type === 'error') className = 'chat-error self-center';
             div.className = className; div.innerText = text;
-            
             const wrapper = document.createElement('div');
             wrapper.className = `flex w-full ${type === 'user' ? 'justify-end' : 'justify-start'}`;
             wrapper.appendChild(div); 
